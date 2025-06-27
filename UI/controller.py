@@ -9,11 +9,47 @@ class Controller:
         self._model = model
 
     def handleBuildGraph(self, e):
-        pass
+        yearMin = int(self._view._ddYear1.value)
+        yearMax = int(self._view._ddYear2.value)
+        if yearMin>yearMax:
+            self._view._txtGraphDetails.controls.clear()
+            self._view._txtGraphDetails.controls.append(ft.Text("Range di anni non valido."))
+            self._view.update_page()
+            return
+
+        self._model.buildGraph(yearMin, yearMax)
+        n, a = self._model.getGraphInfo()
+        self._view._txtGraphDetails.controls.clear()
+        self._view._txtGraphDetails.controls.append(ft.Text("Grafo correttamente creato."))
+        self._view._txtGraphDetails.controls.append(ft.Text(f"Il grafo contiene {n} nodi e {a} archi."))
+        self._view.update_page()
 
 
     def handlePrintDetails(self, e):
-        pass
+        result = self._model.getGraphDetails()
+        self._view._txtGraphDetails.controls.clear()
+        self._view._txtGraphDetails.controls.append(ft.Text("Stampa dettagli:"))
+        for r in result:
+            self._view._txtGraphDetails.controls.append(ft.Text(f"{r[0]} -- {r[1]}"))
+        self._view.update_page()
 
     def handleCercaTeamSfortunati(self, e):
-        pass
+        numAnni = int(self._view._txtInNumDiEdizioni.value)
+        soglia = int(self._view._txtInSoglia.value)
+
+        listOfConstructors, totScore, listOfScores = self._model.getTeamsSfortunati(soglia, numAnni)
+
+        # self._view._txt_result.controls.clear()
+        self._view._txt_result.controls.append(ft.Text(f"I {soglia} costruttori più sfortunati che hanno partecipato ad almeno {numAnni} campionati sono:"))
+        for c in range(len(listOfConstructors)):
+            self._view._txt_result.controls.append(ft.Text(f"Constructor {c+1}: "
+                                                           f"{listOfConstructors[c]} - score: {listOfScores[c]}"))
+        self._view._txt_result.controls.append(ft.Text(f"Score totale: {totScore}"))
+        self._view.update_page()
+
+
+    def fillDdYears(self):
+        years = self._model.getYears()
+        yearsDDoptions = list(map(lambda y: ft.dropdown.Option(y), years))
+        self._view._ddYear1.options = yearsDDoptions
+        self._view._ddYear2.options = yearsDDoptions
